@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="DiabetesHelper.Views.MealLogPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:DiabetesHelper.ViewModels"
+    xmlns:models="clr-namespace:DiabetesHelper.Models"
+    x:DataType="vm:MealLogViewModel"
+    Title="Meals">
+
+    <Grid RowDefinitions="Auto,*" Padding="16" RowSpacing="12">
+
+        <VerticalStackLayout Grid.Row="0" Spacing="8">
+            <Entry Placeholder="Description" Text="{Binding NewDescription}" />
+            <Entry Placeholder="Carbs (g)" Keyboard="Numeric" Text="{Binding NewCarbsGrams}" />
+            <Entry Placeholder="Notes (optional)" Text="{Binding NewNotes}" />
+            <Button Text="Add Meal" Command="{Binding SaveCommand}" />
+        </VerticalStackLayout>
+
+        <CollectionView Grid.Row="1" ItemsSource="{Binding Meals}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:Meal">
+                    <Grid Padding="0,8" ColumnDefinitions="*,Auto">
+                        <VerticalStackLayout>
+                            <Label Text="{Binding Description}" FontAttributes="Bold" LineBreakMode="TailTruncation" />
+                            <Label Text="{Binding Notes}" FontSize="12" TextColor="Gray" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" HorizontalOptions="End">
+                            <Label Text="{Binding CarbsGrams, StringFormat='{0} g'}" FontAttributes="Bold" />
+                            <Label Text="{Binding TimestampUtc, StringFormat='{0:g}'}" FontSize="12" TextColor="Gray" />
+                        </VerticalStackLayout>
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+    </Grid>
+
+</ContentPage>
