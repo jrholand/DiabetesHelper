@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-AppxPackage | Where-Object {$_.Name -match \"1\\\\.5|WinAppRuntime\"} | Select-Object Name,Version | Sort-Object Name | Format-Table -AutoSize)",
+      "PowerShell(Add-AppxPackage -Register \"C:\\\\Users\\\\jrhol\\\\Documents\\\\code\\\\DiabetesHelper\\\\bin\\\\Debug\\\\net8.0-windows10.0.19041.0\\\\win10-x64\\\\AppxManifest.xml\" -ExternalLocation \"C:\\\\Users\\\\jrhol\\\\Documents\\\\code\\\\DiabetesHelper\\\\bin\\\\Debug\\\\net8.0-windows10.0.19041.0\\\\win10-x64\" 2>&1)",
+      "PowerShell(Get-WinEvent -LogName \"Microsoft-Windows-AppXDeploymentServer/Operational\" -MaxEvents 15 -ErrorAction SilentlyContinue | Where-Object {$_.Message -match \"diabeteshelper|External|Trusted\"} | Select-Object TimeCreated, Id, Message | Format-List)",
+      "PowerShell(Add-AppxPackage -Path $msix 2>&1)",
+      "PowerShell($msix = \"C:\\\\Users\\\\jrhol\\\\Documents\\\\code\\\\DiabetesHelper\\\\bin\\\\Debug\\\\net8.0-windows10.0.19041.0\\\\win10-x64\\\\AppPackages\\\\DiabetesHelper_1.0.0.1_x64_Debug_Test\\\\DiabetesHelper_1.0.0.1_x64_Debug.msix\")",
+      "Bash(dotnet build *)"
+    ]
+  }
+}
