@@ -21,6 +21,8 @@ public class LocalDatabase
             await _connection.CreateTableAsync<GlucoseReading>();
             await _connection.CreateTableAsync<InsulinDose>();
             await _connection.CreateTableAsync<Meal>();
+            await _connection.CreateTableAsync<MealItem>();
+            await _connection.CreateTableAsync<FavoriteFood>();
             _initialized = true;
         }
 

@@ -14,4 +14,6 @@ public class Meal
     public double CarbsGrams { get; set; }
 
     public string? Notes { get; set; }
+
+    public string? PhotoPath { get; set; }
 }

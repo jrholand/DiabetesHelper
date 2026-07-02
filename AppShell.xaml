@@ -18,10 +18,22 @@
             ContentTemplate="{DataTemplate views:InsulinLogPage}"
             Route="InsulinLogPage" />
 
-        <ShellContent
-            Title="Carbs"
-            ContentTemplate="{DataTemplate views:MealLogPage}"
-            Route="MealLogPage" />
+        <Tab Title="Carbs">
+            <ShellContent
+                Title="Log"
+                ContentTemplate="{DataTemplate views:MealLogPage}"
+                Route="MealLogPage" />
+
+            <ShellContent
+                Title="Photo"
+                ContentTemplate="{DataTemplate views:MealPhotoPage}"
+                Route="MealPhotoPage" />
+
+            <ShellContent
+                Title="Favorites"
+                ContentTemplate="{DataTemplate views:FavoritesPage}"
+                Route="FavoritesPage" />
+        </Tab>
     </TabBar>
 
 </Shell>

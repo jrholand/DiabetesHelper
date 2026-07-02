@@ -28,5 +28,9 @@
 	</array>
 	<key>XSAppIconAssets</key>
 	<string>Assets.xcassets/appicon.appiconset</string>
+	<key>NSCameraUsageDescription</key>
+	<string>DiabetesHelper uses the camera to photograph meals so it can estimate carbs and glycemic index per food item.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>DiabetesHelper uses your photo library so you can select an existing meal photo to estimate carbs and glycemic index per food item.</string>
 </dict>
 </plist>

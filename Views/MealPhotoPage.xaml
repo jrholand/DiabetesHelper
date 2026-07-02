@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="DiabetesHelper.Views.MealPhotoPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:DiabetesHelper.ViewModels"
+    x:DataType="vm:MealPhotoViewModel"
+    Title="Photo">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Settings" Clicked="OnSettingsToolbarItemClicked" />
+    </ContentPage.ToolbarItems>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="12">
+
+            <HorizontalStackLayout Spacing="8">
+                <Button Text="Take Photo" Command="{Binding TakePhotoCommand}" IsVisible="{Binding IsCaptureSupported}" />
+                <Button Text="Choose Photo" Command="{Binding ChoosePhotoCommand}" />
+            </HorizontalStackLayout>
+
+            <Image Source="{Binding PhotoPath}" HeightRequest="200" Aspect="AspectFit" />
+
+            <Button Text="Analyze Photo" Command="{Binding AnalyzeCommand}" IsEnabled="{Binding HasPhoto}" />
+
+            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" />
+            <Label Text="{Binding ErrorMessage}" TextColor="Red" />
+
+            <CollectionView ItemsSource="{Binding Items}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="vm:EditableFoodItem">
+                        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8" Padding="0,4">
+                            <Entry Text="{Binding Name}" />
+                            <Entry Grid.Column="1" Text="{Binding CarbsGrams}" Keyboard="Numeric" WidthRequest="70" Placeholder="g" />
+                            <Entry Grid.Column="2" Text="{Binding GlycemicIndex}" Keyboard="Numeric" WidthRequest="60" Placeholder="GI" />
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <Button Text="Save Meal" Command="{Binding SaveCommand}" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

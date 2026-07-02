@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="DiabetesHelper.Views.SettingsPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:DiabetesHelper.ViewModels"
+    x:DataType="vm:SettingsViewModel"
+    Title="Settings">
+
+    <VerticalStackLayout Padding="24" Spacing="12">
+        <Label Text="AI Provider" FontAttributes="Bold" />
+        <Picker ItemsSource="{Binding AvailableProviders}" SelectedItem="{Binding SelectedProvider}" />
+
+        <Label Text="API Key" FontAttributes="Bold" Margin="0,12,0,0" />
+        <Entry Placeholder="Paste your API key" Text="{Binding ApiKey}" IsPassword="True" />
+
+        <Button Text="Connect / Save" Command="{Binding SaveCommand}" Margin="0,12,0,0" />
+        <Label Text="{Binding StatusMessage}" TextColor="Gray" />
+
+        <Button Text="Close" Command="{Binding CloseCommand}" Margin="0,16,0,0" />
+    </VerticalStackLayout>
+
+</ContentPage>
