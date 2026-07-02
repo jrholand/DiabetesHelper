@@ -4,57 +4,47 @@ using DiabetesHelper.Models;
 
 namespace DiabetesHelper.Services;
 
-public class AnthropicFoodVisionService : IFoodVisionService
+public class GoogleGeminiFoodVisionService : IFoodVisionService
 {
-    private const string ModelId = "claude-sonnet-5";
-    private const string AnthropicVersion = "2023-06-01";
+    private const string ModelId = "gemini-2.0-flash";
 
     private readonly HttpClient _httpClient;
     private readonly IApiKeyVaultService _apiKeyVault;
 
-    public AnthropicFoodVisionService(HttpClient httpClient, IApiKeyVaultService apiKeyVault)
+    public GoogleGeminiFoodVisionService(HttpClient httpClient, IApiKeyVaultService apiKeyVault)
     {
         _httpClient = httpClient;
-        _httpClient.BaseAddress ??= new Uri("https://api.anthropic.com/");
+        _httpClient.BaseAddress ??= new Uri("https://generativelanguage.googleapis.com/v1beta/");
         _apiKeyVault = apiKeyVault;
     }
 
     public async Task<List<FoodItemEstimate>> AnalyzeMealPhotoAsync(byte[] imageBytes, string mediaType, CancellationToken cancellationToken)
     {
-        var apiKey = await _apiKeyVault.GetActiveKeyAsync(AiProviders.Anthropic);
+        var apiKey = await _apiKeyVault.GetActiveKeyAsync(AiProviders.GoogleGemini);
         if (string.IsNullOrWhiteSpace(apiKey))
         {
-            throw new FoodVisionException("No Anthropic API key is configured. Add one in Settings.");
+            throw new FoodVisionException("No Google Gemini API key is configured. Add one in Settings.");
         }
 
-        var request = new HttpRequestMessage(HttpMethod.Post, "v1/messages");
-        request.Headers.Add("x-api-key", apiKey);
-        request.Headers.Add("anthropic-version", AnthropicVersion);
+        var request = new HttpRequestMessage(HttpMethod.Post, $"models/{ModelId}:generateContent");
+        request.Headers.Add("x-goog-api-key", apiKey);
         request.Content = JsonContent.Create(new
         {
-            model = ModelId,
-            max_tokens = 1024,
-            messages = new object[]
+            contents = new object[]
             {
                 new
                 {
                     role = "user",
-                    content = new object[]
+                    parts = new object[]
                     {
+                        new { text = FoodVisionPrompt.Text },
                         new
                         {
-                            type = "image",
-                            source = new
+                            inline_data = new
                             {
-                                type = "base64",
-                                media_type = mediaType,
+                                mime_type = mediaType,
                                 data = Convert.ToBase64String(imageBytes)
                             }
-                        },
-                        new
-                        {
-                            type = "text",
-                            text = FoodVisionPrompt.Text
                         }
                     }
                 }
@@ -77,8 +67,8 @@ public class AnthropicFoodVisionService : IFoodVisionService
             throw new FoodVisionException($"The AI service returned an error ({(int)response.StatusCode}). {body}");
         }
 
-        var payload = await response.Content.ReadFromJsonAsync<AnthropicMessageResponse>(cancellationToken: cancellationToken);
-        var text = payload?.Content?.FirstOrDefault(c => c.Type == "text")?.Text;
+        var payload = await response.Content.ReadFromJsonAsync<GeminiResponse>(cancellationToken: cancellationToken);
+        var text = payload?.Candidates?.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.Text;
         if (string.IsNullOrWhiteSpace(text))
         {
             throw new FoodVisionException("The AI service returned an empty response.");
@@ -87,17 +77,26 @@ public class AnthropicFoodVisionService : IFoodVisionService
         return FoodVisionResponseParser.ParseFoodItems(text);
     }
 
-    private class AnthropicMessageResponse
+    private class GeminiResponse
     {
-        [JsonPropertyName("content")]
-        public List<AnthropicContentBlock>? Content { get; set; }
+        [JsonPropertyName("candidates")]
+        public List<GeminiCandidate>? Candidates { get; set; }
     }
 
-    private class AnthropicContentBlock
+    private class GeminiCandidate
     {
-        [JsonPropertyName("type")]
-        public string? Type { get; set; }
+        [JsonPropertyName("content")]
+        public GeminiContent? Content { get; set; }
+    }
 
+    private class GeminiContent
+    {
+        [JsonPropertyName("parts")]
+        public List<GeminiPart>? Parts { get; set; }
+    }
+
+    private class GeminiPart
+    {
         [JsonPropertyName("text")]
         public string? Text { get; set; }
     }

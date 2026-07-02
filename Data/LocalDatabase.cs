@@ -23,6 +23,7 @@ public class LocalDatabase
             await _connection.CreateTableAsync<Meal>();
             await _connection.CreateTableAsync<MealItem>();
             await _connection.CreateTableAsync<FavoriteFood>();
+            await _connection.CreateTableAsync<ApiKeyEntry>();
             _initialized = true;
         }
 

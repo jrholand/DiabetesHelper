@@ -4,20 +4,46 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:vm="clr-namespace:DiabetesHelper.ViewModels"
+    xmlns:models="clr-namespace:DiabetesHelper.Models"
     x:DataType="vm:SettingsViewModel"
     Title="Settings">
 
-    <VerticalStackLayout Padding="24" Spacing="12">
-        <Label Text="AI Provider" FontAttributes="Bold" />
-        <Picker ItemsSource="{Binding AvailableProviders}" SelectedItem="{Binding SelectedProvider}" />
+    <ScrollView>
+        <VerticalStackLayout Padding="24" Spacing="12">
+            <Label Text="AI Provider" FontAttributes="Bold" />
+            <Picker
+                ItemsSource="{Binding AvailableProviders}"
+                ItemDisplayBinding="{Binding DisplayName}"
+                SelectedItem="{Binding SelectedProvider}"
+                SelectedIndexChanged="OnProviderSelectedIndexChanged" />
 
-        <Label Text="API Key" FontAttributes="Bold" Margin="0,12,0,0" />
-        <Entry Placeholder="Paste your API key" Text="{Binding ApiKey}" IsPassword="True" />
+            <Label Text="New API Key" FontAttributes="Bold" Margin="0,12,0,0" />
+            <Entry Placeholder="Paste your API key" Text="{Binding ApiKey}" IsPassword="True" />
 
-        <Button Text="Connect / Save" Command="{Binding SaveCommand}" Margin="0,12,0,0" />
-        <Label Text="{Binding StatusMessage}" TextColor="Gray" />
+            <HorizontalStackLayout Spacing="8" Margin="0,4,0,0">
+                <CheckBox IsChecked="{Binding MakeActiveProvider}" />
+                <Label Text="Use this provider and key" VerticalOptions="Center" />
+            </HorizontalStackLayout>
 
-        <Button Text="Close" Command="{Binding CloseCommand}" Margin="0,16,0,0" />
-    </VerticalStackLayout>
+            <Button Text="Save Key" Command="{Binding SaveCommand}" Margin="0,12,0,0" />
+            <Label Text="{Binding StatusMessage}" TextColor="Gray" />
+
+            <Label Text="Previous Keys" FontAttributes="Bold" Margin="0,20,0,0" />
+            <CollectionView ItemsSource="{Binding KeyHistory}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:ApiKeyEntry">
+                        <Grid Padding="0,8" ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
+                            <Label Grid.Row="0" Grid.Column="0" Text="{Binding MaskedKey}" FontFamily="Courier" FontAttributes="Bold" />
+                            <Label Grid.Row="1" Grid.Column="0" Text="{Binding EnteredLocal, StringFormat='Entered {0:g}'}" FontSize="12" TextColor="Gray" />
+                            <Label Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" Text="Active" TextColor="Green" FontAttributes="Bold" VerticalOptions="Center" IsVisible="{Binding IsActive}" />
+                            <Button Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" Text="Use this key" VerticalOptions="Center" IsVisible="{Binding IsNotActive}" Clicked="OnUseKeyClicked" />
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <Button Text="Close" Command="{Binding CloseCommand}" Margin="0,16,0,0" />
+        </VerticalStackLayout>
+    </ScrollView>
 
 </ContentPage>

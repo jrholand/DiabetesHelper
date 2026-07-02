@@ -1,3 +1,4 @@
+using DiabetesHelper.Models;
 using DiabetesHelper.ViewModels;
 
 namespace DiabetesHelper.Views;
@@ -17,5 +18,16 @@ public partial class SettingsPage : ContentPage
     {
         base.OnAppearing();
         await _viewModel.LoadCommand.ExecuteAsync(null);
+    }
+
+    private async void OnProviderSelectedIndexChanged(object? sender, EventArgs e) =>
+        await _viewModel.ProviderChangedCommand.ExecuteAsync(null);
+
+    private async void OnUseKeyClicked(object? sender, EventArgs e)
+    {
+        if (sender is Button { BindingContext: ApiKeyEntry entry })
+        {
+            await _viewModel.UseKeyCommand.ExecuteAsync(entry);
+        }
     }
 }

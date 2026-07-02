@@ -26,10 +26,14 @@ public static class MauiProgram
         builder.Services.AddSingleton<LocalDatabase>();
         builder.Services.AddSingleton(typeof(IRecordRepository<>), typeof(LocalRecordRepository<>));
         builder.Services.AddSingleton<IFavoriteFoodService, LocalFavoriteFoodService>();
-        builder.Services.AddSingleton<IApiKeyStore, SecureStorageApiKeyStore>();
+        builder.Services.AddSingleton<IApiKeyVaultService, LocalApiKeyVaultService>();
 
         builder.Services.AddHttpClient<AnthropicFoodVisionService>();
-        builder.Services.AddSingleton<IFoodVisionService>(sp => sp.GetRequiredService<AnthropicFoodVisionService>());
+        builder.Services.AddHttpClient<OpenAiFoodVisionService>();
+        builder.Services.AddHttpClient<GoogleGeminiFoodVisionService>();
+        builder.Services.AddHttpClient<MistralFoodVisionService>();
+        builder.Services.AddHttpClient<XaiGrokFoodVisionService>();
+        builder.Services.AddSingleton<IFoodVisionService, ActiveProviderFoodVisionService>();
 
         builder.Services.AddTransient<GlucoseLogViewModel>();
         builder.Services.AddTransient<GlucoseLogPage>();

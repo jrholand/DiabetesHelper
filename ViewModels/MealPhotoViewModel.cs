@@ -9,6 +9,7 @@ namespace DiabetesHelper.ViewModels;
 public partial class MealPhotoViewModel : ObservableObject
 {
     private readonly IFoodVisionService _visionService;
+    private readonly IApiKeyVaultService _apiKeyVault;
     private readonly IRecordRepository<Meal> _mealRepository;
     private readonly IRecordRepository<MealItem> _mealItemRepository;
     private readonly IFavoriteFoodService _favoriteFoodService;
@@ -32,11 +33,13 @@ public partial class MealPhotoViewModel : ObservableObject
 
     public MealPhotoViewModel(
         IFoodVisionService visionService,
+        IApiKeyVaultService apiKeyVault,
         IRecordRepository<Meal> mealRepository,
         IRecordRepository<MealItem> mealItemRepository,
         IFavoriteFoodService favoriteFoodService)
     {
         _visionService = visionService;
+        _apiKeyVault = apiKeyVault;
         _mealRepository = mealRepository;
         _mealItemRepository = mealItemRepository;
         _favoriteFoodService = favoriteFoodService;
@@ -84,6 +87,7 @@ public partial class MealPhotoViewModel : ObservableObject
 
         IsBusy = true;
         ErrorMessage = null;
+        var providerLabel = await GetActiveProviderLabelAsync();
         try
         {
             var imageBytes = await File.ReadAllBytesAsync(PhotoPath);
@@ -104,17 +108,23 @@ public partial class MealPhotoViewModel : ObservableObject
 
             if (estimates.Count == 0)
             {
-                ErrorMessage = "No food items found in that photo. Try another.";
+                ErrorMessage = $"[{providerLabel}] No food items found in that photo. Try another.";
             }
         }
         catch (FoodVisionException ex)
         {
-            ErrorMessage = ex.Message;
+            ErrorMessage = $"[{providerLabel}] {ex.Message}";
         }
         finally
         {
             IsBusy = false;
         }
+    }
+
+    private async Task<string> GetActiveProviderLabelAsync()
+    {
+        var providerId = await _apiKeyVault.GetSelectedProviderAsync();
+        return AiProviders.All.FirstOrDefault(p => p.Id == providerId)?.DisplayName ?? providerId;
     }
 
     [RelayCommand]
