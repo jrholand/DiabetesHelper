@@ -24,6 +24,12 @@ extension) and pick a target device/emulator — there is no headless `dotnet ru
 
 There are currently no automated tests in this repo.
 
+## Session workflow
+
+When starting work in a new session, ask the user for a branch name. If that branch doesn't already
+exist locally or on the remote, create it (off the current branch) and switch to it; do all work for the
+session on that branch rather than directly on `master`.
+
 ### Environment notes for this machine
 
 - .NET 8 SDK and the `maui` workload are installed.
