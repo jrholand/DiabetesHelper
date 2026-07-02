@@ -6,7 +6,12 @@
       "PowerShell(Get-WinEvent -LogName \"Microsoft-Windows-AppXDeploymentServer/Operational\" -MaxEvents 15 -ErrorAction SilentlyContinue | Where-Object {$_.Message -match \"diabeteshelper|External|Trusted\"} | Select-Object TimeCreated, Id, Message | Format-List)",
       "PowerShell(Add-AppxPackage -Path $msix 2>&1)",
       "PowerShell($msix = \"C:\\\\Users\\\\jrhol\\\\Documents\\\\code\\\\DiabetesHelper\\\\bin\\\\Debug\\\\net8.0-windows10.0.19041.0\\\\win10-x64\\\\AppPackages\\\\DiabetesHelper_1.0.0.1_x64_Debug_Test\\\\DiabetesHelper_1.0.0.1_x64_Debug.msix\")",
-      "Bash(dotnet build *)"
+      "Bash(dotnet build *)",
+      "PowerShell(Get-AppxPackage -Name \"com.companyname.diabeteshelper\")",
+      "PowerShell(Remove-AppxPackage)",
+      "PowerShell(Add-AppxPackage -Path \"C:\\\\Users\\\\jrhol\\\\Documents\\\\code\\\\DiabetesHelper\\\\bin\\\\Debug\\\\net8.0-windows10.0.19041.0\\\\win10-x64\\\\AppPackages\\\\DiabetesHelper_1.0.0.1_x64_Debug_Test\\\\DiabetesHelper_1.0.0.1_x64_Debug.msix\")",
+      "Bash(echo \"exit: $?\")",
+      "Read(//c/Program Files/dotnet/sdk/8.0.422/Sdks/Microsoft.NET.Sdk/targets/**)"
     ]
   }
 }
