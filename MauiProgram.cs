@@ -32,6 +32,8 @@ public static class MauiProgram
         builder.Services.AddTransient<InsulinLogPage>();
         builder.Services.AddTransient<MealLogViewModel>();
         builder.Services.AddTransient<MealLogPage>();
+        builder.Services.AddTransient<AboutViewModel>();
+        builder.Services.AddTransient<AboutPage>();
 
         return builder.Build();
     }

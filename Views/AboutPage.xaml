@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="DiabetesHelper.Views.AboutPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:DiabetesHelper.ViewModels"
+    x:DataType="vm:AboutViewModel"
+    Title="About">
+
+    <VerticalStackLayout Padding="24" Spacing="16" VerticalOptions="Center">
+        <Label Text="DiabetesHelper" Style="{StaticResource Headline}" />
+        <Label Text="{Binding VersionString, StringFormat='Version {0}'}" Style="{StaticResource SubHeadline}" />
+        <Label Text="{Binding BuildNumber, StringFormat='Build {0}'}" HorizontalOptions="Center" />
+        <Label Text="{Binding BuildDateDisplay, StringFormat='Built {0}'}" HorizontalOptions="Center" />
+        <Button Text="Close" Command="{Binding CloseCommand}" HorizontalOptions="Center" Margin="0,16,0,0" />
+    </VerticalStackLayout>
+
+</ContentPage>

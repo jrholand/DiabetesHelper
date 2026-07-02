@@ -18,4 +18,6 @@ public partial class InsulinLogPage : ContentPage
         base.OnAppearing();
         await _viewModel.LoadCommand.ExecuteAsync(null);
     }
+
+    private async void OnAboutToolbarItemClicked(object? sender, EventArgs e) => await AboutNavigation.ShowAsync();
 }
