@@ -28,7 +28,7 @@ public partial class GlucoseLogViewModel : ObservableObject
     {
         Readings.Clear();
         var items = await _repository.GetAllAsync();
-        foreach (var item in items.OrderByDescending(r => r.TimestampUtc))
+        foreach (var item in items.OrderByDescending(r => r.EffectiveDateUtc))
         {
             Readings.Add(item);
         }
@@ -42,9 +42,11 @@ public partial class GlucoseLogViewModel : ObservableObject
             return;
         }
 
+        var now = DateTime.UtcNow;
         var reading = new GlucoseReading
         {
-            TimestampUtc = DateTime.UtcNow,
+            CreatedAtUtc = now,
+            EffectiveDateUtc = now,
             ValueMgDl = NewValueMgDl,
             Notes = NewNotes
         };

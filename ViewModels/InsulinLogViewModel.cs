@@ -33,7 +33,7 @@ public partial class InsulinLogViewModel : ObservableObject
     {
         Doses.Clear();
         var items = await _repository.GetAllAsync();
-        foreach (var item in items.OrderByDescending(d => d.TimestampUtc))
+        foreach (var item in items.OrderByDescending(d => d.EffectiveDateUtc))
         {
             Doses.Add(item);
         }
@@ -47,9 +47,11 @@ public partial class InsulinLogViewModel : ObservableObject
             return;
         }
 
+        var now = DateTime.UtcNow;
         var dose = new InsulinDose
         {
-            TimestampUtc = DateTime.UtcNow,
+            CreatedAtUtc = now,
+            EffectiveDateUtc = now,
             Units = NewUnits,
             Type = NewType,
             Notes = NewNotes

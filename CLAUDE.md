@@ -5,8 +5,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project overview
 
 DiabetesHelper is a .NET MAUI mobile app (Android, iOS, Windows) for logging blood glucose readings, insulin
-doses, and meals/carb counts. Data is stored locally in SQLite today; the repository layer is structured so a
-cloud-sync backend can be added later without changing ViewModels or Views.
+doses, and meals/carb counts. Data is stored locally in a LiteDB (embedded NoSQL document store) today; the
+repository layer is structured so a cloud-sync backend can be added later without changing ViewModels or
+Views.
 
 ## Commands
 
@@ -52,25 +53,38 @@ flyout menu (`Shell.FlyoutBehavior="Disabled"`).
 
 **Layered structure**, each feature (Glucose, Insulin, Meal) follows the same shape across these layers:
 
-- `Models/` — plain SQLite-mapped POCOs (`GlucoseReading`, `InsulinDose`, `Meal`), decorated with
-  `SQLite-net` attributes (`[PrimaryKey, AutoIncrement]`).
-- `Data/LocalDatabase.cs` — owns the single `SQLiteAsyncConnection` (file lives in
-  `FileSystem.AppDataDirectory`) and lazily creates tables for all three models on first use.
-- `Services/IRecordRepository<T>` — the storage seam. `LocalRecordRepository<T>` is the only implementation
-  today (thin wrapper over the SQLite connection). **When cloud sync is added, implement this interface
-  again (e.g. a `RemoteRecordRepository<T>` or a decorator that syncs then delegates to the local one) rather
-  than changing the interface shape** — ViewModels depend only on `IRecordRepository<T>`, not on SQLite.
+- `Models/` — plain POCOs (`GlucoseReading`, `InsulinDose`, `Meal`, `MealItem`, `FavoriteFood`). LiteDB's
+  default convention maps a property named `Id` as the primary key, so no mapping attributes are needed.
+  The three loggable record types (`GlucoseReading`, `InsulinDose`, `Meal`) each carry two dates:
+  `CreatedAtUtc` (`init`-only — set once at creation and never reassigned, so it's immutable everywhere in
+  app code) and `EffectiveDateUtc` (mutable — defaults to `CreatedAtUtc` at creation, editable later via the
+  edit-record flow). `MealItem` has no timestamp; `FavoriteFood.LastUsedUtc` is a cache-freshness field, not
+  a loggable-record date, so neither got the Created/Effective split.
+- `Data/LiteDbContext.cs` — owns the single `LiteDatabase` (file lives in `FileSystem.AppDataDirectory`).
+  LiteDB creates collections lazily on first `GetCollection<T>()` access, so no explicit table/collection
+  creation step is needed.
+- `Services/IRecordRepository<T>` — the storage seam. `LiteDbRecordRepository<T>` is the only implementation
+  today (thin wrapper over `ILiteCollection<T>`, using `Upsert` for both insert and update). **When cloud sync
+  is added, implement this interface again (e.g. a `RemoteRecordRepository<T>` or a decorator that syncs then
+  delegates to the local one) rather than changing the interface shape** — ViewModels depend only on
+  `IRecordRepository<T>`, not on LiteDB.
 - `ViewModels/` — one per feature (`GlucoseLogViewModel`, `InsulinLogViewModel`, `MealLogViewModel`), built
   with CommunityToolkit.Mvvm (`ObservableObject` + `[ObservableProperty]` + `[RelayCommand]`). Each exposes an
-  `ObservableCollection<T>` of records, bindable properties for a "new entry" form, a `LoadCommand`, and a
-  `SaveCommand`. These were kept as three separate concrete classes rather than one generic base — the form
-  fields differ per entity (glucose value vs. units+type vs. description+carbs), so a shared base would need
-  as much per-type special-casing as just writing three small classes.
+  `ObservableCollection<T>` of records sorted newest-first by `EffectiveDateUtc`, bindable properties for a
+  "new entry" form, a `LoadCommand`, and a `SaveCommand`. These were kept as three separate concrete classes
+  rather than one generic base — the form fields differ per entity (glucose value vs. units+type vs.
+  description+carbs), so a shared base would need as much per-type special-casing as just writing three small
+  classes. Each feature also has a matching `EditXViewModel` (`EditGlucoseReadingViewModel`,
+  `EditInsulinDoseViewModel`, `EditMealViewModel`) that edits only `EffectiveDateUtc` on the same live record
+  instance shown in the list, following the same one-class-per-type convention.
 - `Views/` — one `ContentPage` + code-behind per feature. Pages call `_viewModel.LoadCommand.ExecuteAsync(null)`
-  in `OnAppearing` to refresh from the DB; there's no separate "navigated to" messaging system.
+  in `OnAppearing` to refresh from the DB; there's no separate "navigated to" messaging system. Tapping a row
+  in the list's `CollectionView` opens the matching `EditXPage` as a modal (via `Views/EditRecordNavigation.cs`,
+  modeled on the existing `Views/AboutNavigation.cs` pattern); popping the modal re-fires `OnAppearing` on the
+  page underneath, which reloads and re-sorts the list automatically.
 
-**DI wiring** happens in `MauiProgram.cs`: `LocalDatabase` and the open-generic
-`IRecordRepository<> -> LocalRecordRepository<>` mapping are singletons; pages and ViewModels are transient,
+**DI wiring** happens in `MauiProgram.cs`: `LiteDbContext` and the open-generic
+`IRecordRepository<> -> LiteDbRecordRepository<>` mapping are singletons; pages and ViewModels are transient,
 constructor-injected (standard MAUI shell-based DI, no service locator pattern in use).
 
 When adding a new loggable record type, follow the existing four-file pattern (model → repository resolves

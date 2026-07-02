@@ -132,9 +132,11 @@ public partial class MealPhotoViewModel : ObservableObject
             resolved.Add(favorite);
         }
 
+        var now = DateTime.UtcNow;
         var meal = new Meal
         {
-            TimestampUtc = DateTime.UtcNow,
+            CreatedAtUtc = now,
+            EffectiveDateUtc = now,
             Description = string.Join(", ", resolved.Select(r => r.Name)),
             CarbsGrams = resolved.Sum(r => r.CarbsGrams),
             PhotoPath = PhotoPath

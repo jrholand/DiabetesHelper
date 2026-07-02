@@ -1,3 +1,4 @@
+using DiabetesHelper.Models;
 using DiabetesHelper.ViewModels;
 
 namespace DiabetesHelper.Views;
@@ -20,4 +21,15 @@ public partial class MealLogPage : ContentPage
     }
 
     private async void OnAboutToolbarItemClicked(object? sender, EventArgs e) => await AboutNavigation.ShowAsync();
+
+    private async void OnMealSelected(object? sender, SelectionChangedEventArgs e)
+    {
+        if (e.CurrentSelection.FirstOrDefault() is not Meal meal)
+        {
+            return;
+        }
+
+        ((CollectionView)sender!).SelectedItem = null;
+        await EditRecordNavigation.ShowMealEditAsync(meal);
+    }
 }
