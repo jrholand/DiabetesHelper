@@ -9,7 +9,7 @@
 
     <TabBar>
         <ShellContent
-            Title="Glucose"
+            Title="Blood Sugar"
             ContentTemplate="{DataTemplate views:GlucoseLogPage}"
             Route="GlucoseLogPage" />
 
@@ -19,7 +19,7 @@
             Route="InsulinLogPage" />
 
         <ShellContent
-            Title="Meals"
+            Title="Carbs"
             ContentTemplate="{DataTemplate views:MealLogPage}"
             Route="MealLogPage" />
     </TabBar>

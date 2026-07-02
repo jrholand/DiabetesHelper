@@ -6,7 +6,7 @@
     xmlns:vm="clr-namespace:DiabetesHelper.ViewModels"
     xmlns:models="clr-namespace:DiabetesHelper.Models"
     x:DataType="vm:GlucoseLogViewModel"
-    Title="Glucose">
+    Title="Blood Sugar">
 
     <Grid RowDefinitions="Auto,*" Padding="16" RowSpacing="12">
 
