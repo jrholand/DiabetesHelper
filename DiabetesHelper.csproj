@@ -25,6 +25,24 @@
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
+
+		<!-- MSIX version must strictly increase between publishes, otherwise Add-AppxPackage cannot
+		     upgrade in place and requires Remove-AppxPackage first, which deletes the app's local data
+		     folder (LocalState) - see build_deploy_windows memory. The MAUI Windows packaging pipeline
+		     (Microsoft.Maui.Resizetizer's GeneratePackageAppxManifest task) builds the MSIX Identity
+		     Version from ApplicationDisplayVersion + ApplicationVersion, zero-padded to 4 parts - a
+		     3-part ApplicationDisplayVersion ("1.0.<build>") supplies a free 3rd part alongside
+		     ApplicationVersion's 4th part. Build = days since 2024-01-01 (fits the UInt16 version-part
+		     limit for ~179 years, never regresses across a year boundary); Revision = minutes since UTC
+		     midnight (0-1439, also fits). Two publishes in the same minute tie and need a manual
+		     Remove-AppxPackage fallback. NOTE: the manifest-generation target is incremental on file
+		     timestamps, not on these property values - Platforms\Windows\Package.appxmanifest's
+		     timestamp must be touched before every publish or the stale cached manifest (with the old
+		     version) gets reused; see build_deploy_windows memory for the exact publish steps. -->
+		<WindowsPackageVersionBuild Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">$([MSBuild]::Add($([MSBuild]::Multiply($([MSBuild]::Subtract($([System.DateTime]::UtcNow.Year), 2024)), 366)), $([System.DateTime]::UtcNow.DayOfYear)))</WindowsPackageVersionBuild>
+		<WindowsPackageVersionRevision Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">$([MSBuild]::Add($([MSBuild]::Multiply($([System.DateTime]::UtcNow.Hour), 60)), $([System.DateTime]::UtcNow.Minute)))</WindowsPackageVersionRevision>
+		<ApplicationDisplayVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">1.0.$(WindowsPackageVersionBuild)</ApplicationDisplayVersion>
+		<ApplicationVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">$(WindowsPackageVersionRevision)</ApplicationVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -46,13 +64,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="LiteDB" Version="5.0.21" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.1" />
 		<PackageReference Include="Microsoft.Extensions.Http" Version="8.0.1" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
-		<PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
-		<PackageReference Include="SQLitePCLRaw.bundle_green" Version="2.1.10" />
 	</ItemGroup>
 
 	<Target Name="AddBuildDateMetadata" BeforeTargets="GetAssemblyAttributes">

@@ -21,7 +21,7 @@
             <Button Text="Add Dose" Command="{Binding SaveCommand}" />
         </VerticalStackLayout>
 
-        <CollectionView Grid.Row="1" ItemsSource="{Binding Doses}">
+        <CollectionView Grid.Row="1" ItemsSource="{Binding Doses}" SelectionMode="Single" SelectionChanged="OnDoseSelected">
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="models:InsulinDose">
                     <Grid Padding="0,8" ColumnDefinitions="*,Auto">
@@ -29,7 +29,7 @@
                         <VerticalStackLayout Grid.Column="1" HorizontalOptions="End">
                             <Label Text="{Binding Units, StringFormat='{0} u'}" FontAttributes="Bold" />
                             <Label Text="{Binding Type}" FontSize="12" TextColor="Gray" />
-                            <Label Text="{Binding TimestampUtc, StringFormat='{0:g}'}" FontSize="12" TextColor="Gray" />
+                            <Label Text="{Binding EffectiveDateUtc, StringFormat='{0:g}'}" FontSize="12" TextColor="Gray" />
                         </VerticalStackLayout>
                     </Grid>
                 </DataTemplate>

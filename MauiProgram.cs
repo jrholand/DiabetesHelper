@@ -23,10 +23,10 @@ public static class MauiProgram
         builder.Logging.AddDebug();
 #endif
 
-        builder.Services.AddSingleton<LocalDatabase>();
-        builder.Services.AddSingleton(typeof(IRecordRepository<>), typeof(LocalRecordRepository<>));
-        builder.Services.AddSingleton<IFavoriteFoodService, LocalFavoriteFoodService>();
-        builder.Services.AddSingleton<IApiKeyVaultService, LocalApiKeyVaultService>();
+        builder.Services.AddSingleton<LiteDbContext>();
+        builder.Services.AddSingleton(typeof(IRecordRepository<>), typeof(LiteDbRecordRepository<>));
+        builder.Services.AddSingleton<IFavoriteFoodService, LiteDbFavoriteFoodService>();
+        builder.Services.AddSingleton<IApiKeyVaultService, LiteDbApiKeyVaultService>();
 
         builder.Services.AddHttpClient<AnthropicFoodVisionService>();
         builder.Services.AddHttpClient<OpenAiFoodVisionService>();
@@ -49,6 +49,12 @@ public static class MauiProgram
         builder.Services.AddTransient<SettingsPage>();
         builder.Services.AddTransient<AboutViewModel>();
         builder.Services.AddTransient<AboutPage>();
+        builder.Services.AddTransient<EditGlucoseReadingViewModel>();
+        builder.Services.AddTransient<EditGlucoseReadingPage>();
+        builder.Services.AddTransient<EditInsulinDoseViewModel>();
+        builder.Services.AddTransient<EditInsulinDosePage>();
+        builder.Services.AddTransient<EditMealViewModel>();
+        builder.Services.AddTransient<EditMealPage>();
 
         return builder.Build();
     }

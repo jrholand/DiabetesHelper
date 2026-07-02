@@ -31,7 +31,7 @@ public partial class MealLogViewModel : ObservableObject
     {
         Meals.Clear();
         var items = await _repository.GetAllAsync();
-        foreach (var item in items.OrderByDescending(m => m.TimestampUtc))
+        foreach (var item in items.OrderByDescending(m => m.EffectiveDateUtc))
         {
             Meals.Add(item);
         }
@@ -45,9 +45,11 @@ public partial class MealLogViewModel : ObservableObject
             return;
         }
 
+        var now = DateTime.UtcNow;
         var meal = new Meal
         {
-            TimestampUtc = DateTime.UtcNow,
+            CreatedAtUtc = now,
+            EffectiveDateUtc = now,
             Description = NewDescription,
             CarbsGrams = NewCarbsGrams,
             Notes = NewNotes

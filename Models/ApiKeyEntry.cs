@@ -1,15 +1,16 @@
-using SQLite;
+using LiteDB;
 
 namespace DiabetesHelper.Models;
 
-// Stored in the local SQLite db (see LocalDatabase) so keys survive independently of platform
+// Stored in the local LiteDB store (see LiteDbContext) so keys survive independently of platform
 // secure-storage quirks - on this dev machine's MSIX sideload workflow, SecureStorage was found
 // not to survive a package reinstall, while the db file does. Unlike the other Models/ types,
-// this table is NOT meant to ever be included if/when a cloud-sync backend is added later -
-// these are secrets, not data to sync.
+// this collection is NOT meant to ever be included if/when a cloud-sync backend is added later -
+// these are secrets, not data to sync. Also unlike GlucoseReading/InsulinDose/Meal, this has no
+// CreatedAtUtc/EffectiveDateUtc split - it's a secret with an entry date, not a loggable diabetes
+// record a user would ever want to backdate.
 public class ApiKeyEntry
 {
-    [PrimaryKey, AutoIncrement]
     public int Id { get; set; }
 
     public string Provider { get; set; } = string.Empty;
@@ -19,17 +20,17 @@ public class ApiKeyEntry
     public DateTime EnteredUtc { get; set; } = DateTime.UtcNow;
 
     // Not persisted - exactly one entry across the whole vault is ever active, tracked by a
-    // single id pointer (see LocalApiKeyVaultService), and set on this instance at read time.
-    [Ignore]
+    // single id pointer (see LiteDbApiKeyVaultService), and set on this instance at read time.
+    [BsonIgnore]
     public bool IsActive { get; set; }
 
-    [Ignore]
+    [BsonIgnore]
     public DateTime EnteredLocal => EnteredUtc.ToLocalTime();
 
-    [Ignore]
+    [BsonIgnore]
     public bool IsNotActive => !IsActive;
 
-    [Ignore]
+    [BsonIgnore]
     public string MaskedKey => Key.Length <= 4
         ? new string('•', Key.Length)
         : new string('•', Key.Length - 4) + Key[^4..];

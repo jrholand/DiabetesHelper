@@ -1,3 +1,4 @@
+using DiabetesHelper.Models;
 using DiabetesHelper.ViewModels;
 
 namespace DiabetesHelper.Views;
@@ -20,4 +21,15 @@ public partial class InsulinLogPage : ContentPage
     }
 
     private async void OnAboutToolbarItemClicked(object? sender, EventArgs e) => await AboutNavigation.ShowAsync();
+
+    private async void OnDoseSelected(object? sender, SelectionChangedEventArgs e)
+    {
+        if (e.CurrentSelection.FirstOrDefault() is not InsulinDose dose)
+        {
+            return;
+        }
+
+        ((CollectionView)sender!).SelectedItem = null;
+        await EditRecordNavigation.ShowInsulinEditAsync(dose);
+    }
 }

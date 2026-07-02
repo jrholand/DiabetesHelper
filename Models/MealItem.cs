@@ -1,10 +1,7 @@
-using SQLite;
-
 namespace DiabetesHelper.Models;
 
 public class MealItem
 {
-    [PrimaryKey, AutoIncrement]
     public int Id { get; set; }
 
     public int MealId { get; set; }

@@ -21,7 +21,7 @@
             <Button Text="Add Meal" Command="{Binding SaveCommand}" />
         </VerticalStackLayout>
 
-        <CollectionView Grid.Row="1" ItemsSource="{Binding Meals}">
+        <CollectionView Grid.Row="1" ItemsSource="{Binding Meals}" SelectionMode="Single" SelectionChanged="OnMealSelected">
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="models:Meal">
                     <Grid Padding="0,8" ColumnDefinitions="*,Auto">
@@ -31,7 +31,7 @@
                         </VerticalStackLayout>
                         <VerticalStackLayout Grid.Column="1" HorizontalOptions="End">
                             <Label Text="{Binding CarbsGrams, StringFormat='{0} g'}" FontAttributes="Bold" />
-                            <Label Text="{Binding TimestampUtc, StringFormat='{0:g}'}" FontSize="12" TextColor="Gray" />
+                            <Label Text="{Binding EffectiveDateUtc, StringFormat='{0:g}'}" FontSize="12" TextColor="Gray" />
                         </VerticalStackLayout>
                     </Grid>
                 </DataTemplate>
