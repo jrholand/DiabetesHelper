@@ -3,6 +3,10 @@ using DiabetesHelper.Services;
 using DiabetesHelper.ViewModels;
 using DiabetesHelper.Views;
 using Microsoft.Extensions.Logging;
+using Microsoft.Maui.LifecycleEvents;
+#if WINDOWS
+using Microsoft.Maui.Platform;
+#endif
 
 namespace DiabetesHelper;
 
@@ -21,6 +25,23 @@ public static class MauiProgram
 
 #if DEBUG
         builder.Logging.AddDebug();
+#endif
+
+#if WINDOWS
+        builder.ConfigureLifecycleEvents(events =>
+        {
+            events.AddWindows(windows => windows.OnWindowCreated(window =>
+            {
+                var appWindow = window.GetAppWindow();
+                if (appWindow is null)
+                {
+                    return;
+                }
+
+                var current = appWindow.Size;
+                appWindow.Resize(new Windows.Graphics.SizeInt32(current.Width / 3, current.Height / 2));
+            }));
+        });
 #endif
 
         builder.Services.AddSingleton<LiteDbContext>();
