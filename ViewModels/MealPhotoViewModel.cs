@@ -123,8 +123,13 @@ public partial class MealPhotoViewModel : ObservableObject
 
     private async Task<string> GetActiveProviderLabelAsync()
     {
-        var providerId = await _apiKeyVault.GetSelectedProviderAsync();
-        return AiProviders.All.FirstOrDefault(p => p.Id == providerId)?.DisplayName ?? providerId;
+        var active = await _apiKeyVault.GetActiveEntryAsync();
+        if (active is null)
+        {
+            return "No active provider";
+        }
+
+        return AiProviders.All.FirstOrDefault(p => p.Id == active.Provider)?.DisplayName ?? active.Provider;
     }
 
     [RelayCommand]

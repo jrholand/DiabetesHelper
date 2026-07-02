@@ -2,9 +2,9 @@ using DiabetesHelper.Models;
 
 namespace DiabetesHelper.Services;
 
-// The service MealPhotoViewModel actually depends on. Looks up whichever provider is currently
-// selected (Settings screen) and delegates to that provider's IFoodVisionService implementation,
-// so "Analyze Photo" always uses the active provider/key rather than a hardcoded one.
+// The service MealPhotoViewModel actually depends on. Looks up the single globally-active key
+// entry and delegates to that entry's provider's IFoodVisionService implementation, so
+// "Analyze Photo" always uses the active provider/key rather than a hardcoded one.
 public class ActiveProviderFoodVisionService : IFoodVisionService
 {
     private readonly IApiKeyVaultService _apiKeyVault;
@@ -31,10 +31,15 @@ public class ActiveProviderFoodVisionService : IFoodVisionService
 
     public async Task<List<FoodItemEstimate>> AnalyzeMealPhotoAsync(byte[] imageBytes, string mediaType, CancellationToken cancellationToken)
     {
-        var provider = await _apiKeyVault.GetSelectedProviderAsync();
-        if (!_servicesByProvider.TryGetValue(provider, out var service))
+        var active = await _apiKeyVault.GetActiveEntryAsync();
+        if (active is null)
         {
-            throw new FoodVisionException($"Unknown AI provider '{provider}'. Pick one in Settings.");
+            throw new FoodVisionException("No AI provider is active yet. Pick one in Settings and save it.");
+        }
+
+        if (!_servicesByProvider.TryGetValue(active.Provider, out var service))
+        {
+            throw new FoodVisionException($"Unknown AI provider '{active.Provider}'. Pick one in Settings.");
         }
 
         return await service.AnalyzeMealPhotoAsync(imageBytes, mediaType, cancellationToken);

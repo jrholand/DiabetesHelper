@@ -16,6 +16,7 @@
                 ItemDisplayBinding="{Binding DisplayName}"
                 SelectedItem="{Binding SelectedProvider}"
                 SelectedIndexChanged="OnProviderSelectedIndexChanged" />
+            <Button Text="Save Provider" Command="{Binding SaveProviderCommand}" Margin="0,8,0,0" />
 
             <Label Text="New API Key" FontAttributes="Bold" Margin="0,12,0,0" />
             <Entry Placeholder="Paste your API key" Text="{Binding ApiKey}" IsPassword="True" />

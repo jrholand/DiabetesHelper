@@ -18,6 +18,9 @@ public class ApiKeyEntry
 
     public DateTime EnteredUtc { get; set; } = DateTime.UtcNow;
 
+    // Not persisted - exactly one entry across the whole vault is ever active, tracked by a
+    // single id pointer (see LocalApiKeyVaultService), and set on this instance at read time.
+    [Ignore]
     public bool IsActive { get; set; }
 
     [Ignore]

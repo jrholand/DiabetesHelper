@@ -26,10 +26,9 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty]
     private string? statusMessage;
 
-    // Whether saving the key in ApiKey below should also make SelectedProvider the one
-    // ActiveProviderFoodVisionService actually uses, versus just adding it to that provider's
-    // history without switching what's currently active. Defaults on since that's the common
-    // case - entering a key almost always means "use it now".
+    // Whether saving the key in ApiKey below should also make it the one globally-active
+    // entry, versus just adding it to that provider's history without switching what's active.
+    // Defaults on since that's the common case - entering a key almost always means "use it now".
     [ObservableProperty]
     private bool makeActiveProvider = true;
 
@@ -41,8 +40,8 @@ public partial class SettingsViewModel : ObservableObject
     [RelayCommand]
     public async Task LoadAsync()
     {
-        var selectedId = await _apiKeyVault.GetSelectedProviderAsync();
-        SelectedProvider = AvailableProviders.FirstOrDefault(p => p.Id == selectedId) ?? AvailableProviders[0];
+        var active = await _apiKeyVault.GetActiveEntryAsync();
+        SelectedProvider = AvailableProviders.FirstOrDefault(p => p.Id == active?.Provider) ?? AvailableProviders[0];
 
         ApiKey = string.Empty;
         StatusMessage = null;
@@ -50,13 +49,31 @@ public partial class SettingsViewModel : ObservableObject
     }
 
     // Changing the picker only switches which provider's key/history you're viewing here -
-    // it does NOT by itself change which provider the app uses. That's controlled by
-    // MakeActiveProvider on save, or by explicitly picking "Use this key" below.
+    // it does NOT by itself change which provider the app uses. That's controlled by the
+    // "Save Provider" button, the MakeActiveProvider checkbox on save, or "Use this key" below.
     [RelayCommand]
     private async Task ProviderChangedAsync()
     {
         ApiKey = string.Empty;
         StatusMessage = null;
+        await RefreshHistoryAsync();
+    }
+
+    // Makes SelectedProvider's most-recently-entered key the one globally-active entry,
+    // without requiring the user to add a new key just to switch back to a provider they've
+    // already saved a key for.
+    [RelayCommand]
+    private async Task SaveProviderAsync()
+    {
+        var mostRecent = KeyHistory.FirstOrDefault();
+        if (mostRecent is null)
+        {
+            StatusMessage = "Add a key for this provider first.";
+            return;
+        }
+
+        await _apiKeyVault.ActivateAsync(mostRecent.Id);
+        StatusMessage = $"{SelectedProvider.DisplayName} is now the active provider.";
         await RefreshHistoryAsync();
     }
 
@@ -69,12 +86,12 @@ public partial class SettingsViewModel : ObservableObject
             return;
         }
 
-        await _apiKeyVault.AddKeyAsync(SelectedProvider.Id, ApiKey.Trim());
+        var newEntry = await _apiKeyVault.AddKeyAsync(SelectedProvider.Id, ApiKey.Trim());
         ApiKey = string.Empty;
 
         if (MakeActiveProvider)
         {
-            await _apiKeyVault.SetSelectedProviderAsync(SelectedProvider.Id);
+            await _apiKeyVault.ActivateAsync(newEntry.Id);
             StatusMessage = "Saved and set as the active provider.";
         }
         else
@@ -88,8 +105,7 @@ public partial class SettingsViewModel : ObservableObject
     [RelayCommand]
     private async Task UseKeyAsync(ApiKeyEntry entry)
     {
-        await _apiKeyVault.ActivateAsync(SelectedProvider.Id, entry.Id);
-        await _apiKeyVault.SetSelectedProviderAsync(SelectedProvider.Id);
+        await _apiKeyVault.ActivateAsync(entry.Id);
         StatusMessage = $"Now using the key entered {entry.EnteredLocal:g}.";
         await RefreshHistoryAsync();
     }
